@@ -29,15 +29,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <unistd.h> /* B.A. for unlink function */
-
+#include <unistd.h>
 
 #include "misc.h"
 #include "avra.h"
 #include "args.h"
 
-
-int open_out_files(struct prog_info *pi, char *filename)
+int open_out_files(struct prog_info *pi, const char *filename, const char *outputfile,
+	const char *debugfile, const char *eepfile)
 {
 	int length;
 	char *buff;
@@ -65,13 +64,14 @@ int open_out_files(struct prog_info *pi, char *filename)
 
 	/* open files for code output */
 	strcpy(&buff[length], ".hex");
-	if (!(pi->hfi = open_hex_file(buff)))      /* check if open failed */
+	if (!(pi->hfi = open_hex_file((outputfile == NULL) ? buff : outputfile)))
 	{
+		/* check if open failed */
 		print_msg(pi, MSGTYPE_ERROR, "Could not create output hex file!");
 		ok = False;
 	}
 	strcpy(&buff[length], ".obj");
-	if (!(pi->obj_file = open_obj_file(pi, buff)))
+	if (!(pi->obj_file = open_obj_file(pi, (debugfile == NULL) ? buff : debugfile)))
 	{
 		print_msg(pi, MSGTYPE_ERROR, "Could not create object file!");
 		ok = False;
@@ -79,7 +79,7 @@ int open_out_files(struct prog_info *pi, char *filename)
 
 	/* open files for eeprom output */
 	strcpy(&buff[length], ".eep.hex");
-	if (!(pi->eep_hfi = open_hex_file(buff)))
+	if (!(pi->eep_hfi = open_hex_file((eepfile == NULL) ? buff : eepfile)))
 	{
 		print_msg(pi, MSGTYPE_ERROR, "Could not create eeprom hex file!");
 		ok = False;
@@ -183,7 +183,7 @@ void close_out_files(struct prog_info *pi)
 }
 
 
-struct hex_file_info *open_hex_file(char *filename)
+struct hex_file_info *open_hex_file(const char *filename)
 {
 	struct hex_file_info *hfi;
 
@@ -272,7 +272,7 @@ void do_hex_line(struct hex_file_info *hfi)
 }
 
 
-FILE *open_obj_file(struct prog_info *pi, char *filename)
+FILE *open_obj_file(struct prog_info *pi, const char *filename)
 {
 	int i;
 	FILE *fp;

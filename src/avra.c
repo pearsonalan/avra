@@ -54,9 +54,12 @@ const char *title =
 const char *usage =
 	"usage: avra [-f][O|M|I|G] output file type\n"
 	"            [-o <filename>] output file name\n"
+	"            [-d <filename>] debug file name\n"
+	"            [-e <filename>] file name to output EEPROM contents\n"
 	"            [-l <filename>] generate list file\n"
 	"            [-m <mapfile>] generate map file\n"
-	"[--define <symbol>[=<value>]]  [--includedir <dir>] [--listmac]\n"
+	"            [--define <symbol>[=<value>]]\n"
+	"            [--includedir <dir>] [--listmac]\n"
 	"            [--max_errors <number>] [--devices] [--version]\n"
 	"            [-h] [--help] general help\n"
 	"            "
@@ -107,12 +110,12 @@ int main(int argc, char *argv[])
 		define_arg(args, ARG_HELP,        ARGTYPE_BOOLEAN,             'h', "help",        NULL);
 		define_arg(args, ARG_WRAP,        ARGTYPE_BOOLEAN,             'w', "wrap",        NULL); // Not implemented ? B.A.
 		define_arg(args, ARG_WARNINGS,    ARGTYPE_STRING_MULTISINGLE,  'W', "warn",        NULL);
-		define_arg(args, ARG_FILEFORMAT,  ARGTYPE_CHAR_ATTACHED,       'f', "filetype",    "0"); // Not implemented ? B.A.
+		define_arg(args, ARG_FILEFORMAT,  ARGTYPE_CHAR_ATTACHED,       'f', "filetype",    "0");  // Not implemented ? B.A.
 		define_arg(args, ARG_LISTFILE,    ARGTYPE_STRING,              'l', "listfile",    NULL);
-		define_arg(args, ARG_OUTFILE,     ARGTYPE_STRING,              'o', "outfile",     NULL); // Not implemented ? B.A.
+		define_arg(args, ARG_OUTFILE,     ARGTYPE_STRING,              'o', "outfile",     NULL);
 		define_arg(args, ARG_MAPFILE,     ARGTYPE_STRING,              'm', "mapfile",     NULL);
-		define_arg(args, ARG_DEBUGFILE,   ARGTYPE_STRING,              'd', "debugfile",   NULL); // Not implemented ? B.A.
-		define_arg(args, ARG_EEPFILE,     ARGTYPE_STRING,              'e', "eepfile",     NULL); // Not implemented ? B.A.
+		define_arg(args, ARG_DEBUGFILE,   ARGTYPE_STRING,              'd', "debugfile",   NULL);
+		define_arg(args, ARG_EEPFILE,     ARGTYPE_STRING,              'e', "eepfile",     NULL);
 
 
 		c = read_args(args, argc, argv);
@@ -241,7 +244,10 @@ int assemble(struct prog_info *pi)
 					return -1;
 				if (predef_dev(pi)==False)              /* B.A.: Now with error check */
 					return -1;
-				c = open_out_files(pi, pi->args->first_data->data);
+				c = open_out_files(pi, pi->args->first_data->data,
+								   GET_ARG(pi->args, ARG_OUTFILE),
+								   GET_ARG(pi->args, ARG_DEBUGFILE),
+								   GET_ARG(pi->args, ARG_EEPFILE));
 				if (c != 0)
 				{
 					printf("Pass 2...\n");
