@@ -36,7 +36,7 @@
 #include "args.h"
 
 int open_out_files(struct prog_info *pi, const char *filename, const char *outputfile,
-	const char *debugfile, const char *eepfile)
+	const char *objfile, const char *eepfile, const char *cofffile)
 {
 	int length;
 	char *buff;
@@ -71,7 +71,7 @@ int open_out_files(struct prog_info *pi, const char *filename, const char *outpu
 		ok = False;
 	}
 	strcpy(&buff[length], ".obj");
-	if (!(pi->obj_file = open_obj_file(pi, (debugfile == NULL) ? buff : debugfile)))
+	if (!(pi->obj_file = open_obj_file(pi, (objfile == NULL) ? buff : objfile)))
 	{
 		print_msg(pi, MSGTYPE_ERROR, "Could not create object file!");
 		ok = False;
@@ -86,7 +86,7 @@ int open_out_files(struct prog_info *pi, const char *filename, const char *outpu
 	}
 	/* coff file is always generated */
 	strcpy(&buff[length], ".cof");
-	pi->coff_file = open_coff_file(pi, buff);
+	pi->coff_file = open_coff_file(pi, (cofffile == NULL) ? buff : cofffile);
 	/* open list file */
 	if (pi->list_on)
 	{

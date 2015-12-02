@@ -75,6 +75,7 @@ enum {
 	ARG_FILEFORMAT,             /* --filetype              */
 	ARG_LISTFILE,               /* --listfile              */
 	ARG_OUTFILE,                /* --outfile   */
+	ARG_OBJFILE,                /* --objfile   */
 	ARG_MAPFILE,                /* --mapfile   */
 	ARG_DEBUGFILE,              /* --debugfile */
 	ARG_EEPFILE,                /* --eepfile   */
@@ -331,7 +332,7 @@ int expand_macro(struct prog_info *pi, struct macro *macro, char *rest_line);
 
 /* file.c */
 int open_out_files(struct prog_info *pi, const char *filename, const char *outputfile,
-	const char *debugfile, const char *eepfile);
+	const char *objfile, const char *eepfile, const char *cofffile);
 void close_out_files(struct prog_info *pi);
 struct hex_file_info *open_hex_file(const char *filename);
 void close_hex_file(struct hex_file_info *hfi);
@@ -358,7 +359,7 @@ char *my_strlwr(char *in);
 char *my_strupr(char *in);
 
 /* coff.c */
-FILE *open_coff_file(struct prog_info *pi, char *filename);
+FILE *open_coff_file(struct prog_info *pi, const char *filename);
 void write_coff_file(struct prog_info *pi);
 void write_coff_eeprom( struct prog_info *pi, int address, unsigned char data);
 void write_coff_program( struct prog_info *pi, int address, unsigned int data);

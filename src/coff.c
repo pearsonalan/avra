@@ -77,7 +77,7 @@ struct coff_info *ci;
 
 /****************************************************************************************/
 
-FILE *open_coff_file(struct prog_info *pi, char *filename)
+FILE *open_coff_file(struct prog_info *pi, const char *filename)
 {
 
 	int ok /*, i*/;
