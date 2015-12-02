@@ -43,8 +43,8 @@ int nocase_strcmp(char *s, char *t)
 {
 	int i;
 
-	for(i = 0; tolower(s[i]) == tolower(t[i]); i++)
-		if(s[i] == '\0')
+	for (i = 0; tolower(s[i]) == tolower(t[i]); i++)
+		if (s[i] == '\0')
 			return(0);
 	return(tolower(s[i]) - tolower(t[i]));
 }
@@ -58,8 +58,8 @@ int nocase_strncmp(char *s, char *t, int n)
 {
 	int i;
 
-	for(i = 0; (tolower(s[i]) == tolower(t[i])); i++, n--)
-		if((s[i] == '\0') || (n == 1))
+	for (i = 0; (tolower(s[i]) == tolower(t[i])); i++, n--)
+		if ((s[i] == '\0') || (n == 1))
 			return(0);
 	return(tolower(s[i]) - tolower(t[i]));
 }
@@ -73,21 +73,24 @@ char *nocase_strstr(char *s, char *t)
 {
 	int i = 0, j, found = False;
 
-	while((s[i] != '\0') && !found)	{
+	while ((s[i] != '\0') && !found)
+	{
 		j = 0;
-		while(tolower(t[j]) == tolower(s[i + j])) {
+		while (tolower(t[j]) == tolower(s[i + j]))
+		{
 			j++;
-			if(t[j] == '\0') {
+			if (t[j] == '\0')
+			{
 				found = True;
 				break;
-				}
-			else if(s[i + j] == '\0')
-				break;
 			}
-		i++;
+			else if (s[i + j] == '\0')
+				break;
 		}
+		i++;
+	}
 	i--;
-	if(found)
+	if (found)
 		return(&s[i]);
 	return(NULL);
 }
@@ -102,13 +105,14 @@ int atox(char *s)
 {
 	int i = 0, ret = 0;
 
-	while(s[i] != '\0') {
+	while (s[i] != '\0')
+	{
 		ret <<= 4;
-		if((s[i] <= 'F') && (s[i] >= 'A'))
+		if ((s[i] <= 'F') && (s[i] >= 'A'))
 			ret |= s[i] - 'A' + 10;
-		else if((s[i] <= 'f') && (s[i] >= 'a'))
+		else if ((s[i] <= 'f') && (s[i] >= 'a'))
 			ret |= s[i] - 'a' + 10;
-		else if((s[i] <= '9') && (s[i] >= '0'))
+		else if ((s[i] <= '9') && (s[i] >= '0'))
 			ret |= s[i] - '0';
 		i++;
 	}
@@ -124,7 +128,8 @@ int atoi_n(char *s, int n)
 {
 	int i = 0, ret = 0;
 
-	while((s[i] != '\0') && n) {
+	while ((s[i] != '\0') && n)
+	{
 		ret = 10 * ret + (s[i] - '0');
 		i++;
 		n--;
@@ -143,13 +148,14 @@ int atox_n(char *s, int n)
 {
 	int i = 0, ret = 0;
 
-	while((s[i] != '\0') && n) {
+	while ((s[i] != '\0') && n)
+	{
 		ret <<= 4;
-		if((s[i] <= 'F') && (s[i] >= 'A'))
+		if ((s[i] <= 'F') && (s[i] >= 'A'))
 			ret |= s[i] - 'A' + 10;
-		else if((s[i] <= 'f') && (s[i] >= 'a'))
+		else if ((s[i] <= 'f') && (s[i] >= 'a'))
 			ret |= s[i] - 'a' + 10;
-		else if((s[i] <= '9') && (s[i] >= '0'))
+		else if ((s[i] <= '9') && (s[i] >= '0'))
 			ret |= s[i] - '0';
 		i++;
 		n--;
@@ -164,12 +170,12 @@ int atox_n(char *s, int n)
 
 char *my_strlwr(char *in)
 {
-  int i;
+	int i;
 
-  for(i = 0; in[i] != '\0'; i++)
-    in[i] = tolower(in[i]);
+	for (i = 0; in[i] != '\0'; i++)
+		in[i] = tolower(in[i]);
 
-  return(in);
+	return(in);
 }
 
 
@@ -179,12 +185,12 @@ char *my_strlwr(char *in)
 
 char *my_strupr(char *in)
 {
-  int i;
+	int i;
 
-  for(i = 0; in[i] != '\0'; i++)
-    in[i] = toupper(in[i]);
+	for (i = 0; in[i] != '\0'; i++)
+		in[i] = toupper(in[i]);
 
-  return(in);
+	return(in);
 }
 
 /* stdextra.c */

@@ -11,9 +11,9 @@ enum boolean {False = 0, True};
 
 enum filetype
 {
-    AVRSTUDIO = 0,
-    GENERIC,
-    INTEL,
-    MOTOROLA
+	AVRSTUDIO = 0,
+	GENERIC,
+	INTEL,
+	MOTOROLA
 };
 

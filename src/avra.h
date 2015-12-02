@@ -47,11 +47,11 @@
 #  define VER_DATE    "8 May 2010"
 #endif
 
-#define IS_HOR_SPACE(x)	((x == ' ') || (x == 9))
-#define IS_LABEL(x)	(isalnum(x) || (x == '%') || (x == '_'))
-#define IS_END_OR_COMMENT(x)	((x == ';') || (x == 10) || (x == 13) || (x == '\0') || (x == 12))
-#define IS_ENDLINE(x)	((x == 10) || (x == 13) || (x == '\0') || (x == 12))
-#define IS_SEPARATOR(x)	((x == ' ') || (x == ',') || (x == '[') || (x == ']'))
+#define IS_HOR_SPACE(x) ((x == ' ') || (x == 9))
+#define IS_LABEL(x)     (isalnum(x) || (x == '%') || (x == '_'))
+#define IS_END_OR_COMMENT(x)    ((x == ';') || (x == 10) || (x == 13) || (x == '\0') || (x == 12))
+#define IS_ENDLINE(x)   ((x == 10) || (x == 13) || (x == '\0') || (x == 12))
+#define IS_SEPARATOR(x) ((x == ' ') || (x == ',') || (x == '[') || (x == ']'))
 
 #define LINEBUFFER_LENGTH 256
 #define MAX_NESTED_MACROLOOPS 256
@@ -62,22 +62,22 @@
 
 /* Option enumeration */
 enum {
-	ARG_DEFINE = 0,		/* --define, -D            */
-	ARG_INCLUDEPATH,	/* --includedir, -I        */
-	ARG_LISTMAC,		/* --listmac               */
-	ARG_MAX_ERRORS,		/* --max_errors            */
-	ARG_COFF,		/* --coff                  */
-	ARG_DEVICES,		/* --devices               */
-	ARG_VER,		/* --version               */
-	ARG_HELP,		/* --help, -h              */
-	ARG_WRAP,		/* --wrap                  */
-	ARG_WARNINGS,		/* --warn, -W              */
-	ARG_FILEFORMAT,		/* --filetype              */
-	ARG_LISTFILE,		/* --listfile              */
-	ARG_OUTFILE,		/* --outfile   */
-	ARG_MAPFILE,		/* --mapfile   */
-	ARG_DEBUGFILE,		/* --debugfile */
-	ARG_EEPFILE,		/* --eepfile   */
+	ARG_DEFINE = 0,             /* --define, -D            */
+	ARG_INCLUDEPATH,            /* --includedir, -I        */
+	ARG_LISTMAC,                /* --listmac               */
+	ARG_MAX_ERRORS,             /* --max_errors            */
+	ARG_COFF,                   /* --coff                  */
+	ARG_DEVICES,                /* --devices               */
+	ARG_VER,                    /* --version               */
+	ARG_HELP,                   /* --help, -h              */
+	ARG_WRAP,                   /* --wrap                  */
+	ARG_WARNINGS,               /* --warn, -W              */
+	ARG_FILEFORMAT,             /* --filetype              */
+	ARG_LISTFILE,               /* --listfile              */
+	ARG_OUTFILE,                /* --outfile   */
+	ARG_MAPFILE,                /* --mapfile   */
+	ARG_DEBUGFILE,              /* --debugfile */
+	ARG_EEPFILE,                /* --eepfile   */
 	ARG_COUNT
 };
 
@@ -86,8 +86,8 @@ enum {
 	MSGTYPE_WARNING,
 	MSGTYPE_MESSAGE,
 	MSGTYPE_OUT_OF_MEM,
-	MSGTYPE_MESSAGE_NO_LF,		/* B.A. : Like MSGTYPE_MESSAGE, but without /n */
-	MSGTYPE_APPEND			/* B.A. : Print Message without any header and without /n. To append messages */
+	MSGTYPE_MESSAGE_NO_LF,              /* B.A. : Like MSGTYPE_MESSAGE, but without /n */
+	MSGTYPE_APPEND                      /* B.A. : Print Message without any header and without /n. To append messages */
 	/*	MSGTYPE_INCLUDE		B.A. Removed. Was not in used */
 };
 
@@ -149,22 +149,22 @@ struct prog_info
 	struct label *last_constant;
 	struct label *first_variable;
 	struct label *last_variable;
-	struct label *first_blacklist;	/* B.A. : List for undefined symbols. Needed to make forward references safe */
+	struct label *first_blacklist;      /* B.A. : List for undefined symbols. Needed to make forward references safe */
 	struct label *last_blacklist;
 	struct macro *first_macro;
 	struct macro *last_macro;
 	struct macro_call *first_macro_call;
 	struct macro_call *last_macro_call;
-	struct orglist *first_orglist;	/* B.A. : List of used memory segments. Needed for overlap-check */
+	struct orglist *first_orglist;      /* B.A. : List of used memory segments. Needed for overlap-check */
 	struct orglist *last_orglist;
 	int conditional_depth;
-	time_t time;			/* B.A. : Use a global timestamp for listing header and %hour% ... tags */
+	time_t time;                        /* B.A. : Use a global timestamp for listing header and %hour% ... tags */
 	/* coff additions */
 	FILE *coff_file;
 	/* Warning additions */
 	int NoRegDef;
 	int pass;
-	
+
 };
 
 struct file_info
@@ -266,7 +266,7 @@ void get_rootpath(struct prog_info *pi, struct args *args);
 int def_const(struct prog_info *pi, const char *name, int value);
 int def_var(struct prog_info *pi, char *name, int value);
 int def_blacklist(struct prog_info *pi, const char *name);
-int def_orglist(struct prog_info *pi);					/* B.A. : Test for overlapping segments */
+int def_orglist(struct prog_info *pi);                                  /* B.A. : Test for overlapping segments */
 int fix_orglist(struct prog_info *pi);
 void print_orglist(struct prog_info *pi);
 int test_orglist(struct prog_info *pi);

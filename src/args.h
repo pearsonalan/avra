@@ -29,10 +29,10 @@
 #define _args_h_
 
 enum {
-	ARGTYPE_BOOLEAN = 0,       /* boolean Value (0 = False) */
-	ARGTYPE_STRING,            /* Stringpointer in Data     */
-	ARGTYPE_STRING_MULTI,      /* List of strings in Data   */
-	ARGTYPE_STRING_MULTISINGLE, /* List of strings in Data. requires an option for each element */
+	ARGTYPE_BOOLEAN = 0,           /* boolean Value (0 = False) */
+	ARGTYPE_STRING,                /* Stringpointer in Data     */
+	ARGTYPE_STRING_MULTI,          /* List of strings in Data   */
+	ARGTYPE_STRING_MULTISINGLE,     /* List of strings in Data. requires an option for each element */
 	ARGTYPE_CHAR_ATTACHED
 };
 
@@ -41,13 +41,13 @@ enum {
 
 struct args {
 	struct arg *arg;
-	int    count;
+	int count;
 	struct data_list *first_data;
 };
 
 struct arg {
-	int   type;
-	char  letter;
+	int type;
+	char letter;
 	char *longarg;
 	void *data;
 };
