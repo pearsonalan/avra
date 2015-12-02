@@ -211,10 +211,11 @@ int assemble(struct prog_info *pi)
 	if (pi->args->first_data)
 	{
 		printf("Pass 1...\n");
-		if (load_arg_defines(pi)==False)
+		if (load_arg_defines(pi) == False)
 			return -1;
-		if (predef_dev(pi)==False) /* B.A.: Now with error check */
+		if (predef_dev(pi) == False) /* B.A.: Now with error check */
 			return -1;
+
 		/*** FIRST PASS ***/
 		def_orglist(pi);                        /* B.A. : Store first active segment and seg_addr (Default : Code, Adr=0) */
 		c = parse_file(pi, (char *)pi->args->first_data->data);
@@ -296,7 +297,7 @@ int assemble(struct prog_info *pi)
 
 int load_arg_defines(struct prog_info *pi)
 {
-	int i;
+	int i, j;
 	char *expr;
 	char buff[256];
 	struct data_list *define;
@@ -315,37 +316,43 @@ int load_arg_defines(struct prog_info *pi)
 		}
 		else
 		{
-			// if user didnt specify a value, we default to 1
+			/* if user didnt specify a value, we default to 1 */
 			i = 1;
 		}
+
 		/* B.A. : New. Forward references allowed. But check, if everything is ok ... */
-		if (pi->pass==PASS_1) /* Pass 1 */
+		if (pi->pass == PASS_1)
 		{
+			/* Pass 1 */
 			if (test_constant(pi,buff,NULL)!=NULL)
 			{
 				fprintf(stderr,"Error: Can't define symbol %s twice\n", buff);
 				return(False);
 			}
+
 			if (def_const(pi, buff, i)==False)
 				return(False);
 		}
-		else             /* Pass 2 */
+		else
 		{
-			int j;
-			if (get_constant(pi, buff, &j)==False)                /* Defined in Pass 1 and now missing ? */
+			/* Pass 2 */
+			if (get_constant(pi, buff, &j) == False)
 			{
+				/* Defined in Pass 1 and now missing ? */
 				fprintf(stderr,"Constant %s is missing in pass 2\n",buff);
 				return(False);
 			}
+
 			if (i != j)
 			{
 				fprintf(stderr,"Constant %s changed value from %d in pass1 to %d in pass 2\n",buff,j,i);
 				return(False);
 			}
+
 			/* OK. Definition is unchanged */
 		}
 	}
-	return(True);
+	return True;
 }
 
 /******************************************
