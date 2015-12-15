@@ -130,12 +130,14 @@ int parse_directive(struct prog_info *pi)
 	{
 		pi->fi->scratch[i] = toupper(pi->fi->scratch[i]);
 	}
+
 	directive = get_directive_type(pi->fi->scratch + 1);
 	if (directive == -1)
 	{
 		print_msg(pi, MSGTYPE_ERROR, "Unknown directive: %s", pi->fi->scratch);
-		return(True);
+		return True;
 	}
+
 	switch (directive)
 	{
 	case DIRECTIVE_BYTE:
@@ -158,21 +160,24 @@ int parse_directive(struct prog_info *pi)
 		if (pi->pass == PASS_1)
 			pi->dseg_count += i;
 		break;
+
 	case DIRECTIVE_CSEG:
 		fix_orglist(pi);
 		pi->segment = SEGMENT_CODE;
 		def_orglist(pi);
 		break;
+
 	case DIRECTIVE_CSEGSIZE:
 		break;
+
 	case DIRECTIVE_DB:
 		if ((pi->pass == PASS_2) && pi->list_line && pi->list_on)
 		{
 			fprintf(pi->list_file, "          %s\n", pi->list_line);
 			pi->list_line = NULL;
 		}
-		return(parse_db(pi, next));
-//			break;
+		return parse_db(pi, next);
+
 	/* Directive .def */
 	case DIRECTIVE_DEF:
 		if (!next)
@@ -242,6 +247,7 @@ int parse_directive(struct prog_info *pi)
 		strcpy(def->name, next);
 		def->reg = i;
 		break;
+
 	case DIRECTIVE_DEVICE:
 		if (pi->pass == PASS_2)
 			return(True);
@@ -283,6 +289,7 @@ int parse_directive(struct prog_info *pi)
 		pi->eseg_addr = 0;
 		def_orglist(pi);
 		break;
+
 	case DIRECTIVE_DSEG:
 		fix_orglist(pi);
 		pi->segment = SEGMENT_DATA;
@@ -292,12 +299,14 @@ int parse_directive(struct prog_info *pi)
 			print_msg(pi, MSGTYPE_ERROR, "Can't use .DSEG directive because device has no RAM");
 		}
 		break;
+
 	case DIRECTIVE_DW:
 		if (pi->segment == SEGMENT_DATA)
 		{
 			print_msg(pi, MSGTYPE_ERROR, "Can't use .DW directive in data segment (.DSEG)");
 			return(True);
 		}
+
 		while (next)
 		{
 			data = get_next_token(next, TERM_COMMA);
@@ -341,10 +350,12 @@ int parse_directive(struct prog_info *pi)
 			next = data;
 		}
 		break;
+
 	case DIRECTIVE_ENDM:
 	case DIRECTIVE_ENDMACRO:
 		print_msg(pi, MSGTYPE_ERROR, "No .MACRO found before .ENDMACRO");
 		break;
+
 	case DIRECTIVE_EQU:
 		if (!next)
 		{
@@ -393,6 +404,7 @@ int parse_directive(struct prog_info *pi)
 			pi->list_line = NULL;
 		}
 		break;
+
 	case DIRECTIVE_ESEG:
 		fix_orglist(pi);
 		pi->segment = SEGMENT_EEPROM;
@@ -402,9 +414,11 @@ int parse_directive(struct prog_info *pi)
 			print_msg(pi, MSGTYPE_ERROR, "Can't use .ESEG directive because device has no EEPROM");
 		}
 		break;
+
 	case DIRECTIVE_EXIT:
 		pi->fi->exit_file = True;
 		break;
+
 	/*** .include ***/
 	case DIRECTIVE_INCLUDE:
 		if (!next)
@@ -418,10 +432,12 @@ int parse_directive(struct prog_info *pi)
 			fprintf(pi->list_file, "          %s\n", pi->list_line);
 			pi->list_line = NULL;
 		}
-		// Test if include is in local directory
+
+		/* Test if include is in local directory */
 		ok = test_include(next);
 		data = NULL;
 		if (!ok)
+		{
 			for (incpath = GET_ARG(pi->args, ARG_INCLUDEPATH); incpath && !ok; incpath = incpath->next)
 			{
 				i = strlen(incpath->data);
@@ -440,6 +456,8 @@ int parse_directive(struct prog_info *pi)
 				//printf("testing: %s\n", data);
 				ok = test_include(data);
 			}
+		}
+
 		if (ok)
 		{
 			fi_bak = pi->fi;
@@ -447,10 +465,13 @@ int parse_directive(struct prog_info *pi)
 			pi->fi = fi_bak;
 		}
 		else
+		{
 			print_msg(pi, MSGTYPE_ERROR, "Cannot find include file: %s", next);
+		}
 		if (data)
 			free(data);
 		break;
+
 	/*** .includepath ***/
 	case DIRECTIVE_INCLUDEPATH:
 		if (!next)
@@ -536,6 +557,7 @@ int parse_directive(struct prog_info *pi)
 			pi->list_line = NULL;
 		}
 		break;
+
 	case DIRECTIVE_SET:
 		if (!next)
 		{
@@ -557,7 +579,7 @@ int parse_directive(struct prog_info *pi)
 		if (test_constant(pi,next,"%s have already been defined as a .EQU constant")!=NULL)
 			return(True);
 		return(def_var(pi, next, i));
-//			break;
+
 	case DIRECTIVE_DEFINE:
 		if (!next)
 		{
@@ -606,6 +628,7 @@ int parse_directive(struct prog_info *pi)
 			pi->list_line = NULL;
 		}
 		break;
+
 	case DIRECTIVE_PRAGMA:
 #if 0
 		may_do_something_with_pragma_someday();
@@ -614,8 +637,10 @@ int parse_directive(struct prog_info *pi)
 		print_msg(pi, MSGTYPE_MESSAGE, "PRAGMA directives currently ignored");
 #endif
 		break;
+
 	case DIRECTIVE_UNDEF:             // TODO
 		break;
+
 	case DIRECTIVE_IFDEF:
 		if (!next)
 		{
@@ -651,6 +676,7 @@ int parse_directive(struct prog_info *pi)
 				return(False);
 		}
 		break;
+
 	case DIRECTIVE_IFNDEF:
 		if (!next)
 		{
@@ -686,6 +712,7 @@ int parse_directive(struct prog_info *pi)
 			pi->conditional_depth++;
 		}
 		break;
+
 	case DIRECTIVE_IF:
 		if (!next)
 		{
@@ -703,18 +730,21 @@ int parse_directive(struct prog_info *pi)
 				return(False);
 		}
 		break;
+
 	case DIRECTIVE_ELSE:
 	case DIRECTIVE_ELIF:
 	case DIRECTIVE_ELSEIF:
 		if (!spool_conditional(pi, True))
 			return(False);
 		break;
+
 	case DIRECTIVE_ENDIF:
 		if (pi->conditional_depth == 0)
 			print_msg(pi, MSGTYPE_ERROR, "Too many .ENDIF");
 		else
 			pi->conditional_depth--;
 		break;
+
 	case DIRECTIVE_MESSAGE:
 		if (pi->pass == PASS_1)
 			return(True);
@@ -761,6 +791,7 @@ int parse_directive(struct prog_info *pi)
 		next = term_string(pi, next);
 		print_msg(pi, MSGTYPE_WARNING, next);
 		break;
+
 	case DIRECTIVE_ERROR:
 		if (!next)                  /* B.A : Fix segfault bug if .error without parameter was used */
 		{
