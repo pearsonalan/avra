@@ -4,7 +4,7 @@
  *
  *  Copyright (C) 1998-2004 Jon Anders Haugum, Tobias Weber
  *
- * coff.c - Common Object File Format (COFF) support
+ *  coff.c - Common Object File Format (COFF) support
  *
  *	This file was developed for the avra assembler in order to produce COFF output files
  *  for use with the Atmel AVR Studio.  The Lean C Compiler (LCC) debugging stabs
@@ -39,9 +39,7 @@
 #include "coff.h"
 #include "device.h"     /* device flash and eeprom size */
 
-
 struct FundamentalType {
-
 	char const *pString;
 	int Type;
 	int Size;
@@ -72,23 +70,19 @@ struct FundamentalType FundamentalTypes[] = {
 	{0, 0}
 };
 
-
 struct coff_info *ci;
 
 /****************************************************************************************/
 
 FILE *open_coff_file(struct prog_info *pi, const char *filename)
 {
-
-	int ok /*, i*/;
+	int ok;
 	FILE *fp;
-	//unsigned long *pu4;
 	char*p;
 
-
-	ci = calloc( 1, sizeof(struct coff_info) );
-	if ( !ci )
-		return( 0 );
+	ci = calloc(1, sizeof(struct coff_info));
+	if (!ci)
+		return 0;
 
 	ok = True;
 	/* default values */
@@ -102,69 +96,66 @@ FILE *open_coff_file(struct prog_info *pi, const char *filename)
 	ci->GlobalEndAddress = 0;
 
 	/* Linked lists start out at zero */
-	InitializeList( &ci->ListOfSectionHeaders );
-	InitializeList( &ci->ListOfRawData );
-	InitializeList( &ci->ListOfRelocations );
-	InitializeList( &ci->ListOfLineNumbers );
-	InitializeList( &ci->ListOfSymbols );
-	InitializeList( &ci->ListOfGlobals );
-	InitializeList( &ci->ListOfSpecials );
-	InitializeList( &ci->ListOfUndefined );
-	InitializeList( &ci->ListOfStrings );
-	InitializeList( &ci->ListOfTypes );
-	InitializeList( &ci->ListOfSplitLines );
+	InitializeList(&ci->ListOfSectionHeaders);
+	InitializeList(&ci->ListOfRawData);
+	InitializeList(&ci->ListOfRelocations);
+	InitializeList(&ci->ListOfLineNumbers);
+	InitializeList(&ci->ListOfSymbols);
+	InitializeList(&ci->ListOfGlobals);
+	InitializeList(&ci->ListOfSpecials);
+	InitializeList(&ci->ListOfUndefined);
+	InitializeList(&ci->ListOfStrings);
+	InitializeList(&ci->ListOfTypes);
+	InitializeList(&ci->ListOfSplitLines);
 
 	/* add two default sections to SectionHeaders */
-	if (  !AllocateListObject( &ci->ListOfSectionHeaders, sizeof(struct external_scnhdr) ) ||
-		  !AllocateListObject( &ci->ListOfSectionHeaders, sizeof(struct external_scnhdr) ) )
+	if (!AllocateListObject(&ci->ListOfSectionHeaders, sizeof(struct external_scnhdr)) ||
+		!AllocateListObject(&ci->ListOfSectionHeaders, sizeof(struct external_scnhdr)))
 	{
-
 		fprintf(stderr, "\nOut of memory allocating section headers!");
-		return( 0 );
+		return 0;
 	}
 
 	/* add to string table */
-	p = (char *)AllocateListObject( &ci->ListOfStrings,  4 );
-	if ( !p )
+	p = (char *)AllocateListObject(&ci->ListOfStrings, 4);
+	if (!p)
 	{
 		fprintf(stderr, "\nOut of memory allocating string table space!");
-		return( 0 );
+		return 0;
 	}
 
 	/* Allocate space for binary output into ROM, and EEPROM memory buffers for COFF output */
 	/* ASSUMES ci->device is accurate */
 	if ( (ci->pRomMemory = AllocateListObject( &ci->ListOfRawData, pi->device->flash_size * 2 ) ) != 0)
 	{
-		if ( (ci->pEEPRomMemory = AllocateListObject( &ci->ListOfRawData, pi->device->eeprom_size )) != 0)
+		if ((ci->pEEPRomMemory = AllocateListObject( &ci->ListOfRawData, pi->device->eeprom_size )) != 0)
 		{
 			ok = True; /* only true if both buffers are properly allocated */
 			/* now fill them with 0xff's to simulate flash erasure */
-			memset( (void *)ci->pRomMemory, 0xff, pi->device->flash_size * 2 );
-			memset(    (   void    *)ci->pEEPRomMemory,    0xff,    pi->device->eeprom_size    );
+			memset((void *)ci->pRomMemory, 0xff, pi->device->flash_size * 2);
+			memset((void *)ci->pEEPRomMemory, 0xff, pi->device->eeprom_size);
 		}
 	}
-	if ( ok != True )
-		return( 0 );
+	if (ok != True)
+		return 0;
 
 	fp = fopen(filename,"wb");
-	if ( fp == NULL )
+	if (fp == NULL)
 	{
 		fprintf(stderr,"Error: cannot write coff file\n");
-		return( fp );
+		return fp;
 	}
+
 	/* simulate void type .stabs void:t15=r1;*/
 	stab_add_local_type( "void", "15=r1;0;0;" );
 
-	return( fp );
+	return fp;
 }
 
 /****************************************************************************************/
 void write_coff_file(struct prog_info *pi)
 {
-
-	//FILE *fp;
-	//struct label *label;
-	char /* File[256],*/*p;
+	char *p;
 	struct external_scnhdr *pSectionHdr;
 	struct syment *pEntry;
 	union auxent *pAux;
@@ -176,13 +167,14 @@ void write_coff_file(struct prog_info *pi)
 
 	/* add two special sections */
 	/* one for .text */
-	if (  ( pEntry = (struct syment*)AllocateTwoListObjects( &ci->ListOfSpecials, sizeof(struct syment) * 2 ) ) == 0 )
+	if ((pEntry = (struct syment*)AllocateTwoListObjects( &ci->ListOfSpecials, sizeof(struct syment) * 2)) == 0)
 	{
 		fprintf(stderr, "\nOut of memory allocating special headers for .text!");
 		return;
 	}
-	memset( pEntry->n_name, 0, 8 );
-	strcpy( pEntry->n_name, ".text" );
+
+	memset(pEntry->n_name, 0, 8);
+	strcpy(pEntry->n_name, ".text");
 	pEntry->n_value = 0;
 	pEntry->n_scnum = 1;
 	pEntry->n_type = 0;
@@ -193,18 +185,22 @@ void write_coff_file(struct prog_info *pi)
 	pAux->x_scn.x_scnlen = ci->MaxRomAddress + 2;
 	pAux->x_scn.x_nreloc = 0;
 	pAux->x_scn.x_nlinno = ci->ListOfLineNumbers.TotalItems;
+
 	/* one for .bss */
 	if (  ( pEntry = (struct syment*)AllocateTwoListObjects( &ci->ListOfSpecials, sizeof(struct syment) * 2 ) ) == 0 )
 	{
 		fprintf(stderr, "\nOut of memory allocating special header for .bss!");
 		return;
 	}
+
 	memset( pEntry->n_name, 0, 8 );
 	strcpy( pEntry->n_name, ".bss" );
+
 	if ( ci->GlobalStartAddress == -1 )
 	{
 		ci->GlobalEndAddress = ci->GlobalStartAddress = 0x60;
 	}
+
 	pEntry->n_value = ci->GlobalStartAddress;
 	pEntry->n_scnum = 2;
 	pEntry->n_type = 0;
@@ -240,11 +236,10 @@ void write_coff_file(struct prog_info *pi)
 	NumberOfSymbols = ci->ListOfSymbols.TotalItems + ci->ListOfSpecials.TotalItems + ci->ListOfGlobals.TotalItems;
 	SymbolIndex = LastFileIndex = NumberOfSymbols;
 	LastFunctionIndex = 0; /* set to zero on last function */
-	for ( pEntry = (struct syment *)FindLastListObject(&ci->ListOfSymbols);
-		  pEntry != 0;
-		  pEntry = (struct syment *)FindNextLastListObject(&ci->ListOfSymbols) )
+	for (pEntry = (struct syment *)FindLastListObject(&ci->ListOfSymbols);
+		 pEntry != 0;
+		 pEntry = (struct syment *)FindNextLastListObject(&ci->ListOfSymbols))
 	{
-
 		/* Search for .file entries designated by C_FILE */
 		if ( pEntry->n_sclass == C_FILE )
 		{
@@ -273,6 +268,7 @@ void write_coff_file(struct prog_info *pi)
 				pAux->x_sym.x_fcnary.x_fcn.x_endndx = LastFunctionIndex;
 			}
 		}
+
 		/* else do nothing */
 
 		/* update current symbol index */
@@ -280,10 +276,10 @@ void write_coff_file(struct prog_info *pi)
 		SymbolIndex -= ( pNode->Size / sizeof(struct syment) );
 	}
 
-	// File Header
+	/* File Header */
 	ci->FileHeader.f_magic = MAGIC_NUMBER_AVR;
 	ci->FileHeader.f_nscns = 2;
-//    ci->FileHeader.f_timdat = time( (time_t *)&ci->FileHeader.f_timdat);
+    // ci->FileHeader.f_timdat = time( (time_t *)&ci->FileHeader.f_timdat);
 	ci->FileHeader.f_timdat = pi->time;
 	ci->FileHeader.f_symptr = SymbolsOffset;
 	ci->FileHeader.f_nsyms = NumberOfSymbols;
@@ -301,13 +297,13 @@ void write_coff_file(struct prog_info *pi)
 
 	// Section 1 Header
 	pSectionHdr = (struct external_scnhdr *)FindFirstListObject(&ci->ListOfSectionHeaders);
-	if ( !pSectionHdr )
+	if (!pSectionHdr)
 	{
 		fprintf(stderr, "\nInternal Coff error - cannot find section header .text!");
 		return;
 	}
-	memset( &pSectionHdr->s_name[0], 0, sizeof(struct external_scnhdr) );
-	strcpy( &pSectionHdr->s_name[0], ".text");
+	memset(&pSectionHdr->s_name[0], 0, sizeof(struct external_scnhdr));
+	strcpy(&pSectionHdr->s_name[0], ".text");
 	pSectionHdr->s_paddr = 0;
 	pSectionHdr->s_vaddr = 0;
 	pSectionHdr->s_size = ci->MaxRomAddress + 2; /* remember the last instruction */
@@ -325,22 +321,23 @@ void write_coff_file(struct prog_info *pi)
 		return;
 	}
 
-	// Section 2 Header
+	/* Section 2 Header */
 	pSectionHdr = (struct external_scnhdr *)FindNextListObject(&ci->ListOfSectionHeaders);
-	if ( !pSectionHdr )
+	if (!pSectionHdr)
 	{
 		fprintf(stderr, "\nInternal Coff error - cannot find section header .bss!");
 		return;
 	}
 	memset( &pSectionHdr->s_name[0], 0, sizeof(struct external_scnhdr) );
 	strcpy( &pSectionHdr->s_name[0], ".bss");
+
 	/* later expansion */
 	pSectionHdr->s_paddr = ci->GlobalStartAddress;
 	pSectionHdr->s_vaddr = ci->GlobalStartAddress;
 	pSectionHdr->s_flags = STYP_DATA; /* seems it should be STYP_BSS */
 
 	/* write it out */
-	if ( fwrite(&pSectionHdr->s_name[0], 1, sizeof(struct external_scnhdr), pi->coff_file ) !=  sizeof(struct external_scnhdr) )
+	if (fwrite(&pSectionHdr->s_name[0], 1, sizeof(struct external_scnhdr), pi->coff_file ) !=  sizeof(struct external_scnhdr) )
 	{
 		fprintf(stderr,"\nFile error writing section header ...(disk full?)");
 		return;
@@ -348,19 +345,20 @@ void write_coff_file(struct prog_info *pi)
 
 	/* Section N Header - .data or eeprom */
 
-	// Raw Data for Section 1
-	if ( (p = FindFirstListObject(&ci->ListOfRawData) ) == 0 )
+	/* Raw Data for Section 1 */
+	if ((p = FindFirstListObject(&ci->ListOfRawData)) == 0)
 	{
 		fprintf(stderr,"\nInternal error - unable to find binary data!");
 		return;
 	}
 
 	/* write it out */
-	if ( fwrite( p, 1, ci->MaxRomAddress + 2, pi->coff_file ) != (size_t)(ci->MaxRomAddress + 2) )
+	if (fwrite(p, 1, ci->MaxRomAddress + 2, pi->coff_file) != (size_t)(ci->MaxRomAddress + 2))
 	{
 		fprintf(stderr,"\nFile error writing raw .text data ...(disk full?)");
 		return;
 	}
+
 	// Raw data for section n
 
 	// Relocation Info for section 1
@@ -368,15 +366,14 @@ void write_coff_file(struct prog_info *pi)
 	// Relocation info for section n
 
 	// Line numbers for section 1
-	for ( pLine = (struct lineno *)FindFirstListObject( &ci->ListOfLineNumbers );
-		  pLine != 0;
-		  pLine = (struct lineno *)FindNextListObject( &ci->ListOfLineNumbers ) )
+	for (pLine = (struct lineno *)FindFirstListObject(&ci->ListOfLineNumbers);
+		 pLine != 0;
+		 pLine = (struct lineno *)FindNextListObject(&ci->ListOfLineNumbers))
 	{
-
 		pNode = GetCurrentNode( &ci->ListOfLineNumbers );
 
 		/* write it out */
-		if ( fwrite( pLine, 1, pNode->Size, pi->coff_file ) != pNode->Size )
+		if (fwrite(pLine, 1, pNode->Size, pi->coff_file) != pNode->Size)
 		{
 			fprintf(stderr,"\nFile error writing line numbers ...(disk full?)");
 			return;
@@ -386,32 +383,30 @@ void write_coff_file(struct prog_info *pi)
 
 	// Line numbers for section n
 
-	// Symbol table
-	for ( pEntry = (struct syment *)FindFirstListObject( &ci->ListOfSymbols );
-		  pEntry != 0;
-		  pEntry = (struct syment *)FindNextListObject( &ci->ListOfSymbols ) )
+	/* Symbol table */
+	for (pEntry = (struct syment *)FindFirstListObject( &ci->ListOfSymbols);
+		 pEntry != 0;
+		 pEntry = (struct syment *)FindNextListObject( &ci->ListOfSymbols))
 	{
-
 		pNode = GetCurrentNode( &ci->ListOfSymbols );
 
 		/* write it out */
-		if ( fwrite( pEntry, 1, pNode->Size, pi->coff_file ) != pNode->Size )
+		if (fwrite( pEntry, 1, pNode->Size, pi->coff_file) != pNode->Size)
 		{
 			fprintf(stderr,"\nFile error writing symbol table ...(disk full?)");
 			return;
 		}
 	}
 
-	// Symbol table of Globals
-	for ( pEntry = (struct syment *)FindFirstListObject( &ci->ListOfGlobals );
-		  pEntry != 0;
-		  pEntry = (struct syment *)FindNextListObject( &ci->ListOfGlobals ) )
+	/* Symbol table of Globals */
+	for (pEntry = (struct syment *)FindFirstListObject(&ci->ListOfGlobals);
+		 pEntry != 0;
+		 pEntry = (struct syment *)FindNextListObject(&ci->ListOfGlobals))
 	{
-
-		pNode = GetCurrentNode( &ci->ListOfGlobals );
+		pNode = GetCurrentNode(&ci->ListOfGlobals);
 
 		/* write it out */
-		if ( fwrite( pEntry, 1, pNode->Size, pi->coff_file ) != pNode->Size )
+		if (fwrite(pEntry, 1, pNode->Size, pi->coff_file) != pNode->Size)
 		{
 			fprintf(stderr,"\nFile error writing global symbols ...(disk full?)");
 			return;
@@ -419,32 +414,29 @@ void write_coff_file(struct prog_info *pi)
 	}
 
 	/* Specials .text, .bss, .data */
-
-	for ( pEntry = (struct syment *)FindFirstListObject( &ci->ListOfSpecials );
-		  pEntry != 0;
-		  pEntry = (struct syment *)FindNextListObject( &ci->ListOfSpecials ) )
+	for (pEntry = (struct syment *)FindFirstListObject(&ci->ListOfSpecials);
+		 pEntry != 0;
+		 pEntry = (struct syment *)FindNextListObject(&ci->ListOfSpecials))
 	{
-
-		pNode = GetCurrentNode( &ci->ListOfSpecials );
+		pNode = GetCurrentNode(&ci->ListOfSpecials);
 
 		/* write it out */
-		if ( fwrite( pEntry, 1, pNode->Size, pi->coff_file ) != pNode->Size )
+		if (fwrite(pEntry, 1, pNode->Size, pi->coff_file) != pNode->Size)
 		{
 			fprintf(stderr,"\nFile error writing special symbols ...(disk full?)");
 			return;
 		}
 	}
 
-	// String Table
-	for ( p = (char *)FindFirstListObject( &ci->ListOfStrings );
-		  p != 0;
-		  p = (char *)FindNextListObject( &ci->ListOfStrings ) )
+	/* String Table */
+	for (p = (char *)FindFirstListObject(&ci->ListOfStrings);
+		 p != 0;
+		 p = (char *)FindNextListObject(&ci->ListOfStrings))
 	{
-
 		pNode = GetCurrentNode( &ci->ListOfStrings );
 
 		/* write it out */
-		if ( fwrite( p, 1, pNode->Size, pi->coff_file ) != pNode->Size )
+		if (fwrite(p, 1, pNode->Size, pi->coff_file) != pNode->Size)
 		{
 			fprintf(stderr,"\nFile error writing strings data ...(disk full?)");
 			return;
@@ -454,18 +446,19 @@ void write_coff_file(struct prog_info *pi)
 	return;
 }
 
+
 /****************************************************************************************/
 
 void write_coff_eeprom( struct prog_info *pi, int address, unsigned char data)
 {
 
-	if ( !GET_ARG(pi->args, ARG_COFF) )
+	if (!GET_ARG(pi->args, ARG_COFF))
 		return;
 
 	/* Coff output keeps track of binary data in memory buffers */
-	if ( ci->pEEPRomMemory )
+	if (ci->pEEPRomMemory)
 	{
-		if ( address <= pi->device->eeprom_size )
+		if (address <= pi->device->eeprom_size)
 		{
 			*(ci->pEEPRomMemory + address) = data;
 			if ( address >= ci->MaxEepromAddress )
@@ -478,6 +471,8 @@ void write_coff_eeprom( struct prog_info *pi, int address, unsigned char data)
 		}
 	}
 }
+
+
 /****************************************************************************************/
 
 void write_coff_program( struct prog_info *pi, int address, unsigned int data)
@@ -485,18 +480,17 @@ void write_coff_program( struct prog_info *pi, int address, unsigned int data)
 
 	unsigned char *pByte;
 
-	if ( !GET_ARG(pi->args, ARG_COFF) )
+	if (!GET_ARG(pi->args, ARG_COFF))
 		return;
 
 	/* Coff output keeps track of binary data in memory buffers, address is in bytes not words */
-	if ( ci->pRomMemory )
+	if (ci->pRomMemory)
 	{
-/* JEG	if ( address <= pi->device->flash_size ) {  */  /* JEG 4-23-03 */
-		if ( address <= pi->device->flash_size*2 )
+		if (address <= pi->device->flash_size*2)
 		{
 			pByte = (unsigned char *)(ci->pRomMemory + address); /* point to low byte in memory */
-			*pByte++ = (data & 0xff);   /* low byte */
-			*pByte = ((data >> 8) & 0xff); /* high byte */
+			*pByte++ = (data & 0xff);                            /* low byte */
+			*pByte = ((data >> 8) & 0xff);                       /* high byte */
 
 			if ( address >= ci->MaxRomAddress )
 				ci->MaxRomAddress = address;   /* keep high water mark */
@@ -504,74 +498,70 @@ void write_coff_program( struct prog_info *pi, int address, unsigned int data)
 		else
 		{
 			pi->error_count++;
-/* JEG		fprintf(stderr, "Error: FLASH address %d exceeds max range %d", address, pi->device->flash_size ); */
 			fprintf(stderr, "Error: FLASH address %d exceeds max range %d", address, pi->device->flash_size*2 );
 		}
 	}
 }
 
+
 /****************************************************************************************/
 
 void close_coff_file(struct prog_info *pi, FILE *fp)
 {
-
 	/* close the output file */
-	fclose( fp );
+	fclose(fp);
 	pi->coff_file = 0;
 
 	/* free all the internal memory buffers used by ci */
-
-	FreeList( &ci->ListOfSectionHeaders );
-	FreeList( &ci->ListOfRawData );
-	FreeList( &ci->ListOfRelocations );
-	FreeList( &ci->ListOfLineNumbers );
-	FreeList(    &ci->ListOfSymbols    );
-	FreeList( &ci->ListOfGlobals );
-	FreeList( &ci->ListOfUndefined );
-	FreeList( &ci->ListOfStrings );
-	FreeList( &ci->ListOfTypes );
-	FreeList( &ci->ListOfSplitLines );
+	FreeList(&ci->ListOfSectionHeaders);
+	FreeList(&ci->ListOfRawData);
+	FreeList(&ci->ListOfRelocations);
+	FreeList(&ci->ListOfLineNumbers);
+	FreeList(&ci->ListOfSymbols);
+	FreeList(&ci->ListOfGlobals);
+	FreeList(&ci->ListOfUndefined);
+	FreeList(&ci->ListOfStrings);
+	FreeList(&ci->ListOfTypes);
+	FreeList(&ci->ListOfSplitLines);
 
 	/* now free ci */
-	free( ci );
+	free(ci);
 	ci = 0;
 }
 
+
 /****************************************************************************************/
 
-int parse_stabs( struct prog_info *pi, char *p )
+int parse_stabs(struct prog_info *pi, char *p)
 {
 
 	int ok = True;
 	int TypeCode, n;
 	char *pString, *p2, *p3, *p4, *p5, *pType, *pEnd, *pp, *pJoined;
 
-
-	if ( !GET_ARG(pi->args, ARG_COFF) || ( pi->pass == PASS_1 ) )
-		return(True);
+	if (!GET_ARG(pi->args, ARG_COFF) || (pi->pass == PASS_1))
+		return True;
 
 	/* stabs debugging information is in the form:
-	   .stabs "symbolic info string", HexorDecimalTypecode, parm3, parm4, parm5
-	   parm1, parm2, parm3 depend on typecode
-
-	   N_LSYM	0x80		local sym: name,,0,type,offset
-	   N_OPT	0x3c		compiler options
-	   N_SO	0x64		source file name: name,,0,0,address
-	   N_SOL	0x84		#included file name: name,,0,0,address
-	   N_FUN	0x24		procedure: name,,0,linenumber,address
-	   N_GSYM	0x20		global symbol: name,,0,type,0
-	   N_LCSYM	0x28		.lcomm symbol: name,,0,type,address
-	   N_STSYM	0x26		static symbol: name,,0,type,address
-	   N_RSYM	0x40		register sym: name,,0,type,register
-	   N_PSYM	0xa0		parameter: name,,0,type,offset
-
+	 * .stabs "symbolic info string", HexorDecimalTypecode, parm3, parm4, parm5
+	 * parm1, parm2, parm3 depend on typecode
+	 *
+	 * N_LSYM	0x80		local sym: name,,0,type,offset
+	 * N_OPT	0x3c		compiler options
+	 * N_SO		0x64		source file name: name,,0,0,address
+	 * N_SOL	0x84		#included file name: name,,0,0,address
+	 * N_FUN	0x24		procedure: name,,0,linenumber,address
+	 * N_GSYM	0x20		global symbol: name,,0,type,0
+	 * N_LCSYM	0x28		.lcomm symbol: name,,0,type,address
+	 * N_STSYM	0x26		static symbol: name,,0,type,address
+	 * N_RSYM	0x40		register sym: name,,0,type,register
+	 * N_PSYM	0xa0		parameter: name,,0,type,offset
 	 */
 
 	/* Look for multiple commands per line */
 
 	/* .stabs "linktag:T19=s46next:20=*19,0,16;last:20,16,16;a:21=ar1;0;2;22=ar1;0;3;1,32,96;\\",128,0,0,0 */
 	/* .stabs "b:23=ar1;0;4;24=ar1;0;5;2,128,240;;",128,0,0,0 */
-
 
 	/* Look for continuation lines per line */
 
@@ -585,37 +575,38 @@ int parse_stabs( struct prog_info *pi, char *p )
 	p5 = get_next_token(p4, TERM_COMMA );
 	pEnd = get_next_token(p5, TERM_END ); /* zap CR LF, make ASCIIZ */
 
-	if ( !pString || !p2 || !p3 || !p4 || !p5 )
-		return( False );
+	if (!pString || !p2 || !p3 || !p4 || !p5)
+		return False;
 
 	/* Check for split lines */
-	n = strlen( pString );
-	if ( ( pString[n - 1] == '\\' ) && (pString[n - 2] == '\\') )
+	n = strlen(pString);
+	if ((pString[n - 1] == '\\') && (pString[n - 2] == '\\'))
 	{
 		/* We have a continuation string here */
 		pString[n - 2] = 0;
 		n -= 2;
-		if ( !(pp = (char *)AllocateListObject( &ci->ListOfSplitLines, n + 1 ))  )
+		if (!(pp = (char *)AllocateListObject( &ci->ListOfSplitLines, n + 1 )))
 		{
 			fprintf(stderr, "\nOut of memory allocating continuation line!");
-			return( False );
+			return False;
 		}
-		strcpy( pp, pString ); /* loose the continuation characters */
-		return(True);
+		strcpy(pp, pString); /* loose the continuation characters */
+		return True;
 	}
-	if ( ci->ListOfSplitLines.TotalItems > 0 )
+
+	if (ci->ListOfSplitLines.TotalItems > 0)
 	{
 		/* Join lines together and process */
-		if ( !(pJoined = calloc( 1, n + ci->ListOfSplitLines.TotalBytes ) ) )
+		if (!(pJoined = calloc(1, n + ci->ListOfSplitLines.TotalBytes)))
 		{
 			fprintf(stderr, "\nOut of memory joining continuation lines!");
-			return( False );
+			return False;
 		}
+
 		for ( pp = (char *)FindFirstListObject( &ci->ListOfSplitLines );
 			  pp != 0;
 			  pp = (char *)FindNextListObject( &ci->ListOfSplitLines ) )
 		{
-
 			strcat( pJoined, pp ); /* connect the lines */
 		}
 		strcat( pJoined, pString );
@@ -628,7 +619,6 @@ int parse_stabs( struct prog_info *pi, char *p )
 		pString = pJoined;
 	}
 
-
 	if ( *p2 == '0' )
 		TypeCode = atox(p2);    /* presume to be hex 0x */
 	else
@@ -636,7 +626,6 @@ int parse_stabs( struct prog_info *pi, char *p )
 
 	switch ( TypeCode )
 	{
-
 	case N_OPT:     /* compiler options */
 		break;      /* nothing used here */
 
@@ -696,9 +685,11 @@ int parse_stabs( struct prog_info *pi, char *p )
 
 	return( ok );
 }
+
+
 /****************************************************************************************/
 
-int parse_stabn( struct prog_info *pi, char *p )
+int parse_stabn(struct prog_info *pi, char *p)
 {
 
 	int ok = True;
@@ -763,7 +754,6 @@ int parse_stabn( struct prog_info *pi, char *p )
 /****************************************************************************************/
 int stab_add_lineno(  struct prog_info *pi, int LineNumber, char *pLabel, char *pFunction )
 {
-
 	int Address;
 	struct lineno *pln;
 	struct syment *pEntry;
@@ -813,6 +803,8 @@ int stab_add_lineno(  struct prog_info *pi, int LineNumber, char *pLabel, char *
 
 	return(True);
 }
+
+
 /****************************************************************************************/
 
 int stab_add_lbracket( struct prog_info *pi, int Level, char *pLabel, char *pFunction )
@@ -1077,9 +1069,11 @@ int stab_add_function( struct prog_info *pi, char *pName, char *pLabel )
 	ci->NeedLineNumberFixup++; /* once for .bf block */
 	return( True );
 }
+
+
 /****************************************************************************************/
 
-int stab_add_global( struct prog_info *pi, char *pName, char *pType )
+int stab_add_global(struct prog_info *pi, char *pName, char *pType)
 {
 
 	int n, Address, IsArray, SymbolIndex;
@@ -1088,48 +1082,51 @@ int stab_add_global( struct prog_info *pi, char *pName, char *pType )
 	char *p;
 	STABCOFFMAP *pMap;
 
-
-	n = strlen( pName );    /* see if it's 8 bytes or less */
+	n = strlen( pName );        /* see if it's 8 bytes or less */
 	Type = atoi(pType + 1);     /* skip past G, predefined variable type */
-	if ( (CoffType = GetCoffType( Type )) == 0 )
+
+	if ((CoffType = GetCoffType(Type)) == 0)
 	{
 		fprintf(stderr, "\nUnrecognized type found for global %s = %d", pName, Type );
-		return(False);
+		return False;
 	}
-	pMap = (STABCOFFMAP *)GetCurrentListObject( &ci->ListOfTypes );
 
+	pMap = (STABCOFFMAP *)GetCurrentListObject(&ci->ListOfTypes);
 	SymbolIndex = ci->ListOfSymbols.TotalItems;
+
 	/* Allocate Symbol Table entry and fill it in, Auxiliary table if its an array */
 	if ( IsTypeArray( CoffType ) == True )
 	{
 		IsArray = True;
-		pEntry = (struct syment *)AllocateTwoListObjects( &ci->ListOfGlobals, sizeof(struct syment) * 2 );
+		pEntry = (struct syment *)AllocateTwoListObjects(&ci->ListOfGlobals, sizeof(struct syment) * 2);
 	}
 	else
 	{
 		IsArray = False;
-		pEntry = (struct syment *)AllocateListObject( &ci->ListOfGlobals, sizeof(struct syment) );
+		pEntry = (struct syment *)AllocateListObject(&ci->ListOfGlobals, sizeof(struct syment));
 	}
-	if ( (n = AddNameToEntry( pName, pEntry )) == 0 )
+
+	if ((n = AddNameToEntry(pName, pEntry)) == 0)
 	{
-		fprintf(stderr,"\nOut of memory adding local %s to string table", pName );
+		fprintf(stderr,"\nOut of memory adding local %s to string table", pName);
 	}
+
 	/* set value field to be address of label in bytes */
 	/* add underscore to lookup label */
-	if ( (p = calloc( 1, n + 2)) == 0 )
+	if ((p = calloc(1, n + 2)) == 0)
 	{
 		fprintf(stderr,"\nOut of memory adding global %s", pName );
-		return(False);
+		return False;
 	}
 	*p = '_';
 	strcpy( p + 1, pName );
-	if ( !get_symbol(pi, p, &Address) )
+	if (!get_symbol(pi, p, &Address))
 	{
 		fprintf(stderr, "\nUnable to locate global %s", p );
-		free( p );
-		return( False );
+		free(p);
+		return False;
 	}
-	free( p );
+	free(p);
 	pEntry->n_value = Address;  /* already in bytes */
 	if ( ci->GlobalStartAddress == -1 )
 	{
@@ -1143,15 +1140,18 @@ int stab_add_global( struct prog_info *pi, char *pName, char *pType )
 	pEntry->n_scnum = 2;    /* .bss */
 	pEntry->n_type = CoffType;
 	pEntry->n_sclass = C_STAT;
-	if ( IsArray == False )
+	if (IsArray == False)
+	{
 		pEntry->n_numaux = 0;
+	}
 	else
 	{
 		pEntry->n_numaux = 1;
 		pEntry++;
 		AddArrayAuxInfo( (union auxent *)pEntry, (unsigned short)SymbolIndex, pMap );
 	}
-	return( True );
+
+	return True;
 }
 
 /****************************************************************************************/
@@ -1232,7 +1232,10 @@ int stab_add_parameter_symbol( struct prog_info *pi, char *pName, char *pType, c
 	pEntry->n_numaux = 0;
 	return( True );
 }
+
+
 /****************************************************************************************/
+
 int stab_add_static_symbol(  struct prog_info *pi, char *pName, char *pType, char *pLabel  )
 {
 
@@ -1265,6 +1268,8 @@ int stab_add_static_symbol(  struct prog_info *pi, char *pName, char *pType, cha
 	pEntry->n_numaux = 0;
 	return( True );
 }
+
+
 /****************************************************************************************/
 
 int stab_add_local_register(  struct prog_info *pi, char *pName, char *pType, char *pRegister  )
@@ -2013,7 +2018,7 @@ unsigned short GetCoffType( unsigned short StabType )
 		if ( p->StabType == StabType )
 			return( p->CoffType );
 	}
-	return( 0 ); /* Nothing found */
+	return 0; /* Nothing found */
 }
 
 /****************************************************************************************/
@@ -2027,7 +2032,7 @@ unsigned short GetCoffTypeSize( unsigned short StabType )
 		if ( p->StabType == StabType )
 			return( p->ByteSize );
 	}
-	return( 0 ); /* Nothing found */
+	return 0; /* Nothing found */
 }
 
 
@@ -2057,7 +2062,7 @@ int GetStringDelimiters( char *pString, char **pTokens, int MaxTokens )
 	p = pString;
 
 	if ( !p )
-		return( 0 );
+		return 0;
 
 	for ( i = 0; i < MaxTokens; i++ )
 	{
@@ -2285,7 +2290,7 @@ void *FindNextListObject( LISTNODEHEAD *pHead )
 {
 
 	if ( pHead->current->Next == &pHead->Node )
-		return( 0 );
+		return 0;
 
 	pHead->current = pHead->current->Next;
 
@@ -2300,53 +2305,47 @@ LISTNODE *GetCurrentNode( LISTNODEHEAD *pHead )
 }
 
 /****************************************************************************************/
-void *GetCurrentListObject( LISTNODEHEAD *pHead )
+void *GetCurrentListObject(LISTNODEHEAD *pHead)
 {
-
-	return( pHead->current->pObject );
+	return pHead->current->pObject;
 }
 
 
 /****************************************************************************************/
-void *FindLastListObject( LISTNODEHEAD *pHead )
+void *FindLastListObject(LISTNODEHEAD *pHead)
 {
-
-	if ( pHead->Node.Last == &pHead->Node )
-		return(0);  /* Nothing in list */
+	if (pHead->Node.Last == &pHead->Node)
+		return 0;  /* Nothing in list */
 
 	pHead->current = pHead->Node.Last;
-	return( pHead->current->pObject );
+	return pHead->current->pObject;
 }
-/****************************************************************************************/
-void *FindNextLastListObject( LISTNODEHEAD *pHead )
-{
 
-	if ( pHead->current->Last == &pHead->Node )
-		return( 0 );
+/****************************************************************************************/
+void *FindNextLastListObject(LISTNODEHEAD *pHead)
+{
+	if (pHead->current->Last == &pHead->Node)
+		return 0;
 
 	pHead->current = pHead->current->Last;
 
-	return( pHead->current->pObject );
+	return pHead->current->pObject;
 }
 
 /****************************************************************************************/
 
-void FreeList( LISTNODEHEAD *pHead )
+void FreeList(LISTNODEHEAD *pHead)
 {
-
 	LISTNODE *pNode;
 
-	for ( pNode = pHead->Node.Last; pNode->Next != &pHead->Node; pNode = pHead->Node.Last )
+	for (pNode = pHead->Node.Last; pNode->Next != &pHead->Node; pNode = pHead->Node.Last)
 	{
-
-		RemoveNodeFromList( pHead, pNode );
-		free( pNode->pObject );
-		free( pNode );
+		RemoveNodeFromList(pHead, pNode);
+		free(pNode->pObject);
+		free(pNode);
 	}
 	pHead->TotalBytes = 0;
 	pHead->TotalItems = 0;
 	pHead->current = &pHead->Node;
 }
-/****************************************************************************************/
-
 
