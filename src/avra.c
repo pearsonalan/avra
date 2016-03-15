@@ -87,17 +87,6 @@ int main(int argc, char *argv[])
 	struct args *args;
 	unsigned char c;
 
-#if debug == 1
-	int i;
-	for (i = 0; i < argc; i++)
-	{
-		printf(argv[i]);
-		printf("\n");
-	}
-#endif
-
-	printf(title, VER_MAJOR, VER_MINOR, VER_RELEASE, VER_BUILD, VER_DATE);
-
 	args = alloc_args(ARG_COUNT);
 	if (args)
 	{
@@ -155,14 +144,16 @@ int main(int argc, char *argv[])
 	else
 	{
 		show_usage = True;
-		printf("\n");
 	}
+
 	if (show_usage)
 	{
+		printf(title, VER_MAJOR, VER_MINOR, VER_RELEASE, VER_BUILD, VER_DATE);
+		printf("\n");
 		printf("%s", usage);
 	}
-	exit(EXIT_SUCCESS);
-	return (0); /* compiler warning, JEG 4-23-03 */
+
+	return EXIT_SUCCESS;
 }
 
 void get_rootpath(struct prog_info *pi, struct args *args)
