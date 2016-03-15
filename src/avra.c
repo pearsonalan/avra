@@ -251,19 +251,26 @@ int assemble(struct prog_info *pi)
 					printf("Pass 2...\n");
 					parse_file(pi, (char *)pi->args->first_data->data);
 					printf("done\n\n");
-					print_orglist(pi);                  /* B.A.: List used memory segments */
+
+					/* B.A.: List used memory segments */
+					print_orglist(pi);
+
 					if (GET_ARG(pi->args, ARG_COFF) && (pi->error_count == 0))
 					{
 						write_coff_file(pi);
 					}
+
 					write_map_file(pi);
-					if (pi->error_count)              /* if there were errors */
+
+					if (pi->error_count)
 					{
+						/* if there were errors */
 						printf("\nAssembly aborted with %d errors and %d warnings.\n", pi->error_count, pi->warning_count);
 						unlink_out_files(pi, pi->args->first_data->data);
 					}
-					else                 /* assembly was succesfull */
+					else
 					{
+						/* assembly was succesfull */
 						if (pi->warning_count)
 							printf("\nAssembly complete with no errors (%d warnings).\n", pi->warning_count);
 						else
@@ -282,6 +289,7 @@ int assemble(struct prog_info *pi)
 	{
 		printf("Error: You need to specify a file to assemble\n");
 	}
+
 	return pi->error_count;
 }
 
