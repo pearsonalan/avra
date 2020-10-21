@@ -16,3 +16,4 @@ config.log
 config.status
 .deps
 *.swp
+*.obj
