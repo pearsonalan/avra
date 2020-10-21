@@ -29,7 +29,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#ifdef POSIX
 #include <unistd.h>
+#endif
 
 #include "misc.h"
 #include "avra.h"
